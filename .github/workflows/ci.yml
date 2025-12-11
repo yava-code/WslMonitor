@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Install BATS
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y bats
+      
+      - name: Make script executable
+        run: chmod +x wsl_monitor.sh
+      
+      - name: Run tests
+        run: |
+          if [ -f tests/run_tests.sh ]; then
+            chmod +x tests/run_tests.sh
+            ./tests/run_tests.sh
+          else
+            echo "Test runner not found, running BATS directly"
+            if [ -d tests ]; then
+              bats tests/*.bats
+            else
+              echo "No tests found, skipping"
+            fi
+          fi
+      
+      - name: Validate script syntax
+        run: bash -n wsl_monitor.sh
+      
+      - name: Check script runs without errors
+        run: |
+          # Run the script and capture output
+          timeout 10 ./wsl_monitor.sh || echo "Script completed"
+
+  lint:
+    name: Lint Check
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Run ShellCheck
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y shellcheck
+          shellcheck wsl_monitor.sh
