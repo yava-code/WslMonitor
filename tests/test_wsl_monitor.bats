@@ -106,7 +106,7 @@ setup() {
 }
 
 @test "Script checks for WSL or Linux environment" {
-    grep -q "microsoft.*proc.*version" "$SCRIPT" || grep -q "WSL\|Native Linux" "$SCRIPT"
+    grep -q "microsoft" "$SCRIPT" && grep -q "/proc/version" "$SCRIPT"
 }
 
 @test "Script calculates memory percentage" {
@@ -118,5 +118,5 @@ setup() {
 }
 
 @test "Script lists processes" {
-    grep -q "ps -eo" "$SCRIPT" || grep -q "ps.*pid" "$SCRIPT"
+    grep -q "ps -eo" "$SCRIPT"
 }
